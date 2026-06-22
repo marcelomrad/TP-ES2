@@ -65,10 +65,19 @@ pip install -e ".[dev]"
 | `hotspots` | Lista apenas o ranking de hot spots no terminal |
 | `report` | Gera relatório exportável em CSV, JSON ou Markdown |
 
-Analisar um repositório e mostrar tabela + gráfico no terminal:
+O argumento `REPOSITORY` aceita tanto um **caminho local** quanto uma **URL remota** (`https://`, `git@`, etc.).
+
+Analisar um repositório local:
 
 ```bash
 uv run repo-miner analyze /caminho/para/repositorio --lang python --top 10
+```
+
+Analisar um repositório remoto pelo URL:
+
+```bash
+uv run repo-miner analyze https://github.com/usuario/repositorio --lang python
+uv run repo-miner analyze git@github.com:usuario/repositorio.git --top 5
 ```
 
 Listar apenas o ranking de hot spots:
@@ -81,6 +90,12 @@ Gerar relatório CSV:
 
 ```bash
 uv run repo-miner report /caminho/para/repositorio --format csv --out reports/hotspots.csv
+```
+
+Gerar relatório a partir de repositório remoto:
+
+```bash
+uv run repo-miner report https://github.com/usuario/repositorio --format md --out reports/hotspots.md
 ```
 
 Gerar relatório JSON:
