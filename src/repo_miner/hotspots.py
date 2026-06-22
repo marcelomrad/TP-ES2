@@ -7,7 +7,7 @@ from math import sqrt
 from pathlib import Path
 
 from repo_miner.complexity import analyze_complexity, is_source_file, normalize_languages
-from repo_miner.git_mining import mine_history
+from repo_miner.git_mining import clone_remote, is_remote_url, mine_history
 from repo_miner.models import AnalysisResult, ComplexityMetrics, FileHotspot, HistoryMetrics
 
 DEFAULT_EXCLUDE_PATTERNS = (
@@ -145,7 +145,7 @@ def build_hotspot(
 
 
 def analyze_repository(
-    repository: Path,
+    repository: str | Path,
     *,
     since: datetime | None = None,
     until: datetime | None = None,
@@ -157,8 +157,51 @@ def analyze_repository(
     if min_commits < 1:
         raise ValueError("min_commits must be greater than or equal to 1.")
 
-    repository = repository.expanduser().resolve()
-    history, commits_analyzed = mine_history(repository, since=since, until=until)
+    if isinstance(repository, str) and is_remote_url(repository):
+        history, commits_analyzed = mine_history(repository, since=since, until=until)
+        with clone_remote(repository) as local_path:
+            return _build_result(
+                repository=local_path,
+                display_repository=repository,
+                history=history,
+                commits_analyzed=commits_analyzed,
+                languages=languages,
+                include=include,
+                exclude=exclude,
+                min_commits=min_commits,
+                since=since,
+                until=until,
+            )
+
+    local_repository = Path(repository).expanduser().resolve()
+    history, commits_analyzed = mine_history(local_repository, since=since, until=until)
+    return _build_result(
+        repository=local_repository,
+        display_repository=local_repository,
+        history=history,
+        commits_analyzed=commits_analyzed,
+        languages=languages,
+        include=include,
+        exclude=exclude,
+        min_commits=min_commits,
+        since=since,
+        until=until,
+    )
+
+
+def _build_result(
+    repository: Path,
+    display_repository: str | Path,
+    history: dict[str, HistoryMetrics],
+    commits_analyzed: int,
+    *,
+    languages: Iterable[str] | None,
+    include: Iterable[str] | None,
+    exclude: Iterable[str] | None,
+    min_commits: int,
+    since: datetime | None,
+    until: datetime | None,
+) -> AnalysisResult:
     candidate_paths = select_candidate_paths(
         repository,
         history,
@@ -203,7 +246,7 @@ def analyze_repository(
     )
 
     return AnalysisResult(
-        repository=repository,
+        repository=display_repository,
         hotspots=hotspots,
         commits_analyzed=commits_analyzed,
         files_seen=len(history),

@@ -86,7 +86,7 @@ class FileHotspot:
 
 @dataclass(frozen=True)
 class AnalysisResult:
-    repository: Path
+    repository: str | Path
     hotspots: tuple[FileHotspot, ...]
     commits_analyzed: int
     files_seen: int
