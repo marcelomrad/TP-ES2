@@ -12,6 +12,10 @@ class RepositoryMiningError(RuntimeError):
     """Raised when a path cannot be mined as a Git repository."""
 
 
+def is_remote_url(source: str) -> bool:
+    return source.startswith(("https://", "http://", "git@", "git://", "ssh://"))
+
+
 def ensure_git_repository(repository: Path) -> Path:
     repository = repository.expanduser().resolve()
     if not repository.exists():
