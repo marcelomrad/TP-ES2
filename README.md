@@ -57,6 +57,12 @@ pip install -e ".[dev]"
 
 ## 5. Como Usar
 
+| Comando | O que faz |
+|---------|-----------|
+| `analyze` | Analisa o repositório e exibe resumo, ranking e gráfico no terminal |
+| `hotspots` | Lista apenas o ranking de hot spots no terminal |
+| `report` | Gera relatório exportável em CSV, JSON ou Markdown |
+
 Analisar um repositório e mostrar tabela + gráfico no terminal:
 
 ```bash
