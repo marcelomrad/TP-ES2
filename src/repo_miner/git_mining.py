@@ -32,12 +32,17 @@ def normalize_repo_path(path: str | None) -> str | None:
 
 
 def mine_history(
-    repository: Path,
+    repository: str | Path,
     *,
     since: datetime | None = None,
     until: datetime | None = None,
 ) -> tuple[dict[str, HistoryMetrics], int]:
-    repository = ensure_git_repository(repository)
+    repo_source: str | Path
+    if isinstance(repository, str) and is_remote_url(repository):
+        repo_source = repository
+    else:
+        repo_source = ensure_git_repository(Path(repository))
+
     repository_args: dict[str, datetime] = {}
 
     if since is not None:
@@ -49,7 +54,7 @@ def mine_history(
     commits_analyzed = 0
 
     try:
-        commits = Repository(str(repository), **repository_args).traverse_commits()
+        commits = Repository(str(repo_source), **repository_args).traverse_commits()
         for commit in commits:
             commits_analyzed += 1
             author = getattr(commit.author, "name", None) or getattr(commit.author, "email", None)
