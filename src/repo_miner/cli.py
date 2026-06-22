@@ -8,7 +8,7 @@ from rich.console import Console
 
 from repo_miner import __version__
 from repo_miner.exporters import SUPPORTED_FORMATS, write_report
-from repo_miner.git_mining import RepositoryMiningError
+from repo_miner.git_mining import RepositoryMiningError, is_remote_url
 from repo_miner.hotspots import analyze_repository, parse_date
 from repo_miner.rendering import render_hotspot_table, render_plot, render_summary
 
@@ -19,14 +19,9 @@ app = typer.Typer(
 console = Console()
 
 RepositoryArgument = Annotated[
-    Path,
+    str,
     typer.Argument(
-        exists=True,
-        file_okay=False,
-        dir_okay=True,
-        readable=True,
-        resolve_path=True,
-        help="Caminho para um repositorio Git local.",
+        help="Caminho para um repositorio Git local ou URL remota (https://, git@...).",
     ),
 ]
 
@@ -162,7 +157,7 @@ def report(
 
 
 def run_analysis(
-    repository: Path,
+    repository: str,
     *,
     since: str | None,
     until: str | None,
@@ -171,9 +166,10 @@ def run_analysis(
     exclude: list[str] | None,
     min_commits: int,
 ):
+    source = repository if is_remote_url(repository) else Path(repository)
     try:
         return analyze_repository(
-            repository,
+            source,
             since=parse_date(since),
             until=parse_date(until),
             languages=lang,
