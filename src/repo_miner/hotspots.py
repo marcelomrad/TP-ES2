@@ -14,14 +14,22 @@ DEFAULT_EXCLUDE_PATTERNS = (
     ".git/*",
     ".venv/*",
     "venv/*",
+    "env/*",
     "__pycache__/*",
+    "*.pyc",
+    ".mypy_cache/*",
+    ".pytest_cache/*",
+    "*.egg-info/*",
     "node_modules/*",
     "*/node_modules/*",
     "dist/*",
     "build/*",
     "target/*",
+    ".idea/*",
+    ".vscode/*",
     "*.min.js",
     "*.lock",
+    "htmlcov/*",
 )
 
 
