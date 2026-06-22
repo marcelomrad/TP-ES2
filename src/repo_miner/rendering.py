@@ -74,7 +74,7 @@ def render_plot(console: Console, hotspots: tuple[FileHotspot, ...], *, limit: i
         [hotspot.commits for hotspot in selected],
         [hotspot.total_complexity for hotspot in selected],
     )
-    console.print(plt.build())
+    print(plt.build())
 
 
 def risk_style(risk: str) -> str:
