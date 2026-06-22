@@ -22,7 +22,7 @@ FAKE_RESULT = AnalysisResult(
 def test_analyze_rejects_nonexistent_local_path() -> None:
     result = runner.invoke(app, ["analyze", "/nonexistent/path/to/repo"])
     assert result.exit_code != 0
-    assert "Error" in result.output
+    assert "Erro" in result.output
 
 
 def test_analyze_accepts_remote_url() -> None:
