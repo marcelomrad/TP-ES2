@@ -1,5 +1,7 @@
 # TP: Mineração de Repositórios de Software
 
+![CI](https://github.com/marcelomrad/TP-ES2/actions/workflows/ci.yml/badge.svg)
+
 Ferramenta de linha de comando para minerar repositórios Git locais e identificar
 arquivos com maior risco de manutenção por meio de análise de **hot spots**.
 
