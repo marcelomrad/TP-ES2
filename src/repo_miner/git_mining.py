@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import subprocess
 import tempfile
+from collections.abc import Generator
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import Generator
 
 from pydriller import Repository
 
