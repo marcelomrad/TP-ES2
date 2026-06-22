@@ -1,5 +1,8 @@
 # TP: Mineração de Repositórios de Software
 
+Ferramenta de linha de comando para minerar repositórios Git locais e identificar
+arquivos com maior risco de manutenção por meio de análise de **hot spots**.
+
 ## 1. Membros do Grupo
 
 | Nome | Matrícula |
@@ -8,71 +11,200 @@
 | Tomas Lacerda Muniz | 2021088116 |
 | Lorenzo Carneiro Magalhães | 2021031505 |
 
----
+## 2. Problema Analisado
 
-## 2. Descrição do Sistema
+O trabalho identifica arquivos que combinam:
 
-Esta ferramenta de linha de comando (CLI) realiza a **mineração de repositórios Git** com o objetivo de identificar problemas de manutenção de software por meio da análise de *hot spots*.
+- **alta frequência de mudanças no histórico Git**;
+- **alto churn de linhas**, isto é, muitas linhas adicionadas/removidas;
+- **alta complexidade ciclomática atual**.
 
-Um *hot spot* é um arquivo que combina **alta frequência de modificações** (code churn) com **alta complexidade ciclomática** — ou seja, arquivos que mudam constantemente e são difíceis de entender ou manter. Esses arquivos concentram o maior risco de débito técnico em um projeto.
+Essa combinação indica arquivos que mudam muito e são estruturalmente difíceis de
+entender, testar e refatorar. No contexto de manutenção de software, esses arquivos
+são candidatos naturais a revisão, decomposição, melhoria de testes ou refatoração.
 
-### Funcionamento
+## 3. Decisões do Projeto
 
-A ferramenta percorre o histórico de commits de um repositório Git local, coleta métricas por arquivo e cruza duas dimensões:
+| Decisão | Escolha |
+|---|---|
+| Origem dos dados | Repositório **Git local** |
+| Artefatos analisados | Commits, arquivos modificados e código-fonte atual |
+| Problema de manutenção | Hot spots de manutenção |
+| CLI | Typer |
+| Mineração Git | PyDriller |
+| Métricas de código | Lizard |
+| Apresentação | Rich, Plotext, CSV, JSON e Markdown |
 
-- **Code Churn**: número de commits que modificaram cada arquivo em um intervalo de tempo configurável.
-- **Complexidade Ciclomática (CC)**: métrica estrutural que mede o número de caminhos independentes no código-fonte de cada arquivo.
+O projeto usa Git local em vez da API do GitHub porque o objetivo principal é
+minerar histórico de código. Isso evita depender de token, rate limit ou rede no
+momento da análise.
 
-O resultado é um **score de hot spot** calculado pela combinação normalizada dessas duas métricas, permitindo rankear os arquivos mais críticos do projeto. Os resultados são apresentados em tabelas formatadas no terminal e em um scatter plot (churn × complexidade), facilitando a visualização dos arquivos que mais demandam atenção de refatoração.
+## 4. Instalação
 
-### Comandos disponíveis
+Com `uv`:
 
 ```bash
-# Analisar o repositório e coletar métricas
-python -m repo_miner analyze <caminho> --since <data> --lang <linguagem>
-
-# Listar os arquivos com maior score de hot spot
-python -m repo_miner hotspots <caminho> --top 10
-
-# Gerar relatório exportável
-python -m repo_miner report <caminho> --format csv --out results.csv
+uv sync --extra dev
 ```
 
----
+Alternativa com `pip`:
 
-## 3. Tecnologias Utilizadas
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+```
 
-### Interface de Linha de Comando
+## 5. Como Usar
 
-| Ferramenta | Descrição |
-|------------|-----------|
-| [Typer](https://github.com/fastapi/typer) | Framework moderno para CLIs em Python, com suporte a type hints, autocompletion e help automático |
-| [Click](https://github.com/pallets/click) | Alternativa consolidada para construção de CLIs, base do Typer |
+Analisar um repositório e mostrar tabela + gráfico no terminal:
 
-### Mineração de Repositórios Git
+```bash
+uv run repo-miner analyze /caminho/para/repositorio --lang python --top 10
+```
 
-| Ferramenta | Descrição |
-|------------|-----------|
-| [PyDriller](https://github.com/ishepard/pydriller) | Framework Python para análise de repositórios Git; permite iterar commits, autores, arquivos modificados e diffs |
-| [GitPython](https://github.com/gitpython-developers/GitPython) | Biblioteca Python de baixo nível para interação com repositórios Git |
+Listar apenas o ranking de hot spots:
 
-### Análise de Métricas de Código
+```bash
+uv run repo-miner hotspots /caminho/para/repositorio --top 5
+```
 
-| Ferramenta | Descrição |
-|------------|-----------|
-| [Lizard](https://github.com/terryyin/lizard) | Analisador de complexidade de código com suporte multilinguagem (Python, Java, JavaScript, C++ etc.); calcula complexidade ciclomática, LOC e número de parâmetros |
-| [Radon](https://github.com/rubik/radon) | Biblioteca Python para diversas métricas de código (CC, índice de manutenibilidade, métricas de Halstead) |
+Gerar relatório CSV:
 
-### Qualidade e Segurança de Código
+```bash
+uv run repo-miner report /caminho/para/repositorio --format csv --out reports/hotspots.csv
+```
 
-| Ferramenta | Descrição |
-|------------|-----------|
-| [Flake8](https://github.com/PyCQA/flake8) | Verificador de qualidade de código Python (PEP 8, erros lógicos) |
-| [Bandit](https://github.com/PyCQA/bandit) | Ferramenta de análise estática para identificação de vulnerabilidades de segurança em código Python |
+Gerar relatório JSON:
 
-### Apresentação dos Resultados
+```bash
+uv run repo-miner report /caminho/para/repositorio --format json --out reports/hotspots.json
+```
 
-| Ferramenta | Descrição |
-|------------|-----------|
-| [Rich](https://github.com/Textualize/rich) | Biblioteca para renderização de tabelas e texto formatado no terminal |
-| [Plotext](https://github.com/piccolomo/plotext) | Geração de gráficos diretamente no terminal (scatter plot de churn × complexidade) |
+Gerar relatório Markdown:
+
+```bash
+uv run repo-miner report /caminho/para/repositorio --format md --out reports/hotspots.md
+```
+
+Filtrar por período:
+
+```bash
+uv run repo-miner analyze /caminho/para/repositorio --since 2026-01-01 --until 2026-06-22
+```
+
+Filtrar caminhos:
+
+```bash
+uv run repo-miner analyze /caminho/para/repositorio --include "src/*" --exclude "tests/*"
+```
+
+## 6. Métricas Coletadas
+
+| Métrica | Fonte | Interpretação |
+|---|---|---|
+| `commits` | PyDriller | Quantidade de commits que alteraram o arquivo |
+| `line_churn` | PyDriller | Linhas adicionadas + removidas |
+| `authors` | PyDriller | Número de autores que alteraram o arquivo |
+| `total_complexity` | Lizard | Soma da complexidade ciclomática das funções |
+| `max_function_complexity` | Lizard | Maior complexidade de uma função do arquivo |
+| `nloc` | Lizard | Linhas de código não vazias/não comentário |
+| `score` | repo-miner | Score normalizado de risco |
+| `risk` | repo-miner | Classificação: `baixo`, `medio`, `alto` |
+
+## 7. Cálculo do Score
+
+Cada arquivo recebe um score de 0 a 100. As métricas são normalizadas em relação
+ao maior valor encontrado na análise e combinadas assim:
+
+```text
+combined_pressure = sqrt(commit_pressure * complexity_pressure)
+
+score = 100 * (
+  0.75 * combined_pressure
+  + 0.15 * commit_pressure
+  + 0.10 * churn_pressure
+)
+```
+
+O termo principal usa a raiz do produto entre frequência de commits e complexidade.
+Isso privilegia arquivos que são simultaneamente muito alterados e complexos, que é
+a definição operacional de hot spot adotada pelo trabalho.
+
+## 8. Linguagens Suportadas
+
+A análise usa o Lizard e suporta, entre outras:
+
+- Python
+- Java
+- JavaScript
+- TypeScript
+- C/C++
+- C#
+- Go
+- Ruby
+- PHP
+- Swift
+- Kotlin
+- Rust
+- Scala
+
+Use `--lang` para restringir:
+
+```bash
+uv run repo-miner analyze . --lang python --lang javascript
+```
+
+## 9. Testes e Qualidade
+
+Rodar testes:
+
+```bash
+uv run --extra dev pytest
+```
+
+Rodar lint:
+
+```bash
+uv run --extra dev ruff check .
+```
+
+Validação manual no próprio projeto:
+
+```bash
+uv run repo-miner analyze . --lang python --no-plot --top 8
+uv run repo-miner report . --lang python --format json --out reports/sample-hotspots.json
+```
+
+## 10. Estrutura
+
+```text
+src/repo_miner/
+  cli.py          # comandos Typer
+  git_mining.py   # coleta do histórico Git com PyDriller
+  complexity.py   # métricas de código com Lizard
+  hotspots.py     # seleção de arquivos e cálculo do score
+  exporters.py    # CSV, JSON e Markdown
+  rendering.py    # tabela Rich e gráfico Plotext
+  models.py       # dataclasses do domínio
+tests/
+  test_*.py       # testes unitários e integração com repo Git temporário
+docs/
+  RELATORIO.md    # relatório técnico do trabalho
+```
+
+## 11. Limitações
+
+- A ferramenta analisa o estado atual dos arquivos para complexidade, não a
+  complexidade histórica de cada versão.
+- Arquivos removidos no histórico não entram no ranking final, pois não existem no
+  estado atual do repositório.
+- O score é heurístico, mas explícito e reproduzível.
+- Issues, pull requests e CI/CD não são analisados nesta versão.
+
+## 12. Próximos Passos Possíveis
+
+- Coletar issues e pull requests via API do GitHub.
+- Comparar evolução da complexidade ao longo do tempo.
+- Gerar gráficos em PNG/HTML além do terminal.
+- Adicionar sugestões automáticas de refatoração por tipo de arquivo.
