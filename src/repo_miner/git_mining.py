@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import subprocess
+import tempfile
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
+from typing import Generator
 
 from pydriller import Repository
 
@@ -10,6 +14,22 @@ from repo_miner.models import HistoryMetrics
 
 class RepositoryMiningError(RuntimeError):
     """Raised when a path cannot be mined as a Git repository."""
+
+
+@contextmanager
+def clone_remote(url: str) -> Generator[Path, None, None]:
+    with tempfile.TemporaryDirectory() as tmp:
+        clone_path = Path(tmp) / "repo"
+        try:
+            subprocess.run(
+                ["git", "clone", "--depth=1", url, str(clone_path)],
+                check=True,
+                capture_output=True,
+            )
+        except subprocess.CalledProcessError as exc:
+            stderr = exc.stderr.decode(errors="replace")
+            raise RepositoryMiningError(f"Could not clone repository: {stderr}") from exc
+        yield clone_path
 
 
 def is_remote_url(source: str) -> bool:
