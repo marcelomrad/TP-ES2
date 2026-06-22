@@ -161,6 +161,7 @@ def analyze_repository(
     include: Iterable[str] | None = None,
     exclude: Iterable[str] | None = None,
     min_commits: int = 1,
+    min_score: float = 0.0,
 ) -> AnalysisResult:
     if min_commits < 1:
         raise ValueError("min_commits must be greater than or equal to 1.")
@@ -177,6 +178,7 @@ def analyze_repository(
                 include=include,
                 exclude=exclude,
                 min_commits=min_commits,
+                min_score=min_score,
                 since=since,
                 until=until,
             )
@@ -192,6 +194,7 @@ def analyze_repository(
         include=include,
         exclude=exclude,
         min_commits=min_commits,
+        min_score=min_score,
         since=since,
         until=until,
     )
@@ -207,6 +210,7 @@ def _build_result(
     include: Iterable[str] | None,
     exclude: Iterable[str] | None,
     min_commits: int,
+    min_score: float,
     since: datetime | None,
     until: datetime | None,
 ) -> AnalysisResult:
@@ -252,6 +256,9 @@ def _build_result(
             reverse=True,
         )
     )
+
+    if min_score > 0.0:
+        hotspots = tuple(h for h in hotspots if h.score >= min_score)
 
     return AnalysisResult(
         repository=display_repository,
