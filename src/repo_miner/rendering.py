@@ -64,7 +64,8 @@ def render_plot(console: Console, hotspots: tuple[FileHotspot, ...], *, limit: i
     if not selected:
         return
 
-    plt.clt()
+    plt.clf()
+    plt.cld()
     plt.theme("clear")
     plt.title("Hot spots: commits x complexidade")
     plt.xlabel("commits que alteraram o arquivo")
