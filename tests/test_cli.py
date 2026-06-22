@@ -39,7 +39,12 @@ def test_report_accepts_remote_url(tmp_path: Path) -> None:
     with patch("repo_miner.cli.analyze_repository", return_value=FAKE_RESULT):
         result = runner.invoke(
             app,
-            ["report", "https://github.com/user/repo.git", "--format", "csv", "--out", str(out_file)],
+            [
+                "report",
+                "https://github.com/user/repo.git",
+                "--format", "csv",
+                "--out", str(out_file),
+            ],
         )
     assert result.exit_code == 0
 

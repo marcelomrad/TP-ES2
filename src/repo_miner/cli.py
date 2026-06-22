@@ -71,7 +71,7 @@ def analyze(
     ] = 1,
     min_score: Annotated[
         float,
-        typer.Option("--min-score", min=0.0, max=100.0, help="Score minimo para exibir um arquivo (0-100)."),
+        typer.Option("--min-score", min=0.0, max=100.0, help="Score minimo para exibir (0-100)."),
     ] = 0.0,
     top: Annotated[int, typer.Option("--top", min=1, help="Quantidade de arquivos exibidos.")] = 10,
     plot: Annotated[
