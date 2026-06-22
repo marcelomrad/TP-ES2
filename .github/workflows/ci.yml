@@ -26,3 +26,6 @@ jobs:
 
       - name: Run tests
         run: uv run pytest
+
+      - name: Run linter
+        run: uv run ruff check .
