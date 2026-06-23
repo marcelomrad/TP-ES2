@@ -3,7 +3,7 @@ requires = ["hatchling>=1.25"]
 build-backend = "hatchling.build"
 
 [project]
-name = "repo-miner"
+name = "hotscope"
 version = "0.1.0"
 description = "CLI para mineracao de repositorios Git e identificacao de hot spots de manutencao."
 readme = "README.md"
@@ -29,7 +29,7 @@ dev = [
 ]
 
 [project.scripts]
-repo-miner = "repo_miner.cli:app"
+hotscope = "repo_miner.cli:app"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/repo_miner"]

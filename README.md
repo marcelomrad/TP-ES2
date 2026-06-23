@@ -1,11 +1,12 @@
-# TP: Mineração de Repositórios de Software
+# hotscope
 
-![CI](https://github.com/marcelomrad/TP-ES2/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/marcelomrad/hotscope/actions/workflows/ci.yml/badge.svg)
 
-Ferramenta de linha de comando para minerar repositórios Git locais e identificar
-arquivos com maior risco de manutenção por meio de análise de **hot spots**.
+Ferramenta de linha de comando para minerar repositórios Git e identificar arquivos com maior
+risco de manutenção por meio de análise de **hot spots** — arquivos que combinam alta frequência
+de mudanças com alta complexidade ciclomática.
 
-## 1. Membros do Grupo
+## Membros do Grupo
 
 | Nome | Matrícula |
 |------|-----------|
@@ -13,201 +14,164 @@ arquivos com maior risco de manutenção por meio de análise de **hot spots**.
 | Tomas Lacerda Muniz | 2021088116 |
 | Lorenzo Carneiro Magalhães | 2021031505 |
 
-## 2. Problema Analisado
+## Objetivo
 
-O trabalho identifica arquivos que combinam:
+`hotscope` identifica arquivos que simultaneamente:
 
-- **alta frequência de mudanças no histórico Git**;
-- **alto churn de linhas**, isto é, muitas linhas adicionadas/removidas;
-- **alta complexidade ciclomática atual**.
+- mudam com **alta frequência** no histórico Git;
+- acumulam **alto churn de linhas** (linhas adicionadas + removidas);
+- possuem **alta complexidade ciclomática** no estado atual.
 
-Essa combinação indica arquivos que mudam muito e são estruturalmente difíceis de
-entender, testar e refatorar. No contexto de manutenção de software, esses arquivos
-são candidatos naturais a revisão, decomposição, melhoria de testes ou refatoração.
+Essa combinação aponta candidatos naturais a revisão, decomposição e refatoração — os pontos
+mais críticos de manutenção de um projeto.
 
-## 3. Decisões do Projeto
+## Tecnologias
 
-| Decisão | Escolha |
+| Tecnologia | Papel |
 |---|---|
-| Origem dos dados | Repositório **Git local** |
-| Artefatos analisados | Commits, arquivos modificados e código-fonte atual |
-| Problema de manutenção | Hot spots de manutenção |
-| CLI | Typer |
-| Mineração Git | PyDriller |
-| Métricas de código | Lizard |
-| Apresentação | Rich, Plotext, CSV, JSON e Markdown |
+| [PyDriller](https://github.com/ishepard/pydriller) | Mineração do histórico Git (commits, autores, churn) |
+| [Lizard](https://github.com/terryyin/lizard) | Métricas de complexidade ciclomática do código-fonte |
+| [Typer](https://typer.tiangolo.com/) | Interface de linha de comando |
+| [Rich](https://github.com/Textualize/rich) | Tabelas e formatação no terminal |
+| [Plotext](https://github.com/piccolomo/plotext) | Scatter plot no terminal |
+| [pytest](https://pytest.org/) | Testes automatizados |
+| [GitHub Actions](https://github.com/features/actions) | CI/CD com execução automática dos testes |
 
-O projeto usa Git local em vez da API do GitHub porque o objetivo principal é
-minerar histórico de código. Isso evita depender de token, rate limit ou rede no
-momento da análise.
+## Instalação
 
-## 4. Instalação
-
-Com `uv`:
+Com `uv` (recomendado):
 
 ```bash
 uv sync --extra dev
 ```
 
-Alternativa com `pip`:
+Com `pip`:
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 ```
 
-## 5. Como Usar
+## Como Usar
+
+A ferramenta oferece três comandos:
 
 | Comando | O que faz |
 |---------|-----------|
-| `analyze` | Analisa o repositório e exibe resumo, ranking e gráfico no terminal |
-| `hotspots` | Lista apenas o ranking de hot spots no terminal |
-| `report` | Gera relatório exportável em CSV, JSON ou Markdown |
+| `analyze` | Exibe resumo, ranking e gráfico no terminal |
+| `hotspots` | Lista apenas o ranking de hot spots |
+| `report` | Gera relatório em CSV, JSON ou Markdown |
 
-O argumento `REPOSITORY` aceita tanto um **caminho local** quanto uma **URL remota** (`https://`, `git@`, etc.).
+O argumento `REPOSITORY` aceita **caminho local** ou **URL remota** (`https://`, `git@`, etc.).
+
+### Exemplos
 
 Analisar um repositório local:
 
 ```bash
-uv run repo-miner analyze /caminho/para/repositorio --lang python --top 10
+uv run hotscope analyze /caminho/para/repositorio --lang python --top 10
 ```
 
-Analisar um repositório remoto pelo URL:
+Analisar um repositório remoto:
 
 ```bash
-uv run repo-miner analyze https://github.com/usuario/repositorio --lang python
-uv run repo-miner analyze git@github.com:usuario/repositorio.git --top 5
+uv run hotscope analyze https://github.com/usuario/repositorio --lang python
 ```
 
 Listar apenas o ranking de hot spots:
 
 ```bash
-uv run repo-miner hotspots /caminho/para/repositorio --top 5
+uv run hotscope hotspots /caminho/para/repositorio --top 5
 ```
 
 Gerar relatório CSV:
 
 ```bash
-uv run repo-miner report /caminho/para/repositorio --format csv --out reports/hotspots.csv
-```
-
-Gerar relatório a partir de repositório remoto:
-
-```bash
-uv run repo-miner report https://github.com/usuario/repositorio --format md --out reports/hotspots.md
+uv run hotscope report /caminho/para/repositorio --format csv --out relatorio.csv
 ```
 
 Gerar relatório JSON:
 
 ```bash
-uv run repo-miner report /caminho/para/repositorio --format json --out reports/hotspots.json
+uv run hotscope report /caminho/para/repositorio --format json --out relatorio.json
 ```
 
 Gerar relatório Markdown:
 
 ```bash
-uv run repo-miner report /caminho/para/repositorio --format md --out reports/hotspots.md
+uv run hotscope report /caminho/para/repositorio --format md --out relatorio.md
 ```
 
-Filtrar por período:
+Filtrar por período e score mínimo:
 
 ```bash
-uv run repo-miner analyze /caminho/para/repositorio --since 2026-01-01 --until 2026-06-22
+uv run hotscope analyze . --since 2026-01-01 --until 2026-06-22 --min-score 40
 ```
 
-Filtrar caminhos:
+Filtrar por caminhos:
 
 ```bash
-uv run repo-miner analyze /caminho/para/repositorio --include "src/*" --exclude "tests/*"
+uv run hotscope analyze . --include "src/*" --exclude "tests/*"
 ```
 
-Exibir apenas arquivos com score acima de um limite:
+## Testes
+
+Rodar os testes localmente:
 
 ```bash
-uv run repo-miner analyze /caminho/para/repositorio --min-score 50
-uv run repo-miner hotspots /caminho/para/repositorio --min-score 70
-uv run repo-miner report /caminho/para/repositorio --min-score 40 --format csv --out reports/hotspots.csv
+uv run pytest
 ```
 
-## 6. Métricas Coletadas
+Rodar com cobertura:
+
+```bash
+uv run pytest --cov=repo_miner
+```
+
+Rodar o linter:
+
+```bash
+uv run ruff check .
+```
+
+Os testes também são executados automaticamente via **GitHub Actions** a cada push.
+
+## Métricas Coletadas
 
 | Métrica | Fonte | Interpretação |
 |---|---|---|
 | `commits` | PyDriller | Quantidade de commits que alteraram o arquivo |
 | `line_churn` | PyDriller | Linhas adicionadas + removidas |
-| `authors` | PyDriller | Número de autores que alteraram o arquivo |
+| `authors` | PyDriller | Número de autores distintos |
 | `total_complexity` | Lizard | Soma da complexidade ciclomática das funções |
-| `max_function_complexity` | Lizard | Maior complexidade de uma função do arquivo |
-| `nloc` | Lizard | Linhas de código não vazias/não comentário |
-| `score` | repo-miner | Score normalizado de risco |
-| `risk` | repo-miner | Classificação: `baixo`, `medio`, `alto` |
+| `max_function_complexity` | Lizard | Maior complexidade entre as funções do arquivo |
+| `nloc` | Lizard | Linhas de código (sem vazias/comentários) |
+| `score` | hotscope | Score normalizado de risco (0–100) |
+| `risk` | hotscope | Classificação: `baixo`, `medio`, `alto` |
 
-## 7. Cálculo do Score
-
-Cada arquivo recebe um score de 0 a 100. As métricas são normalizadas em relação
-ao maior valor encontrado na análise e combinadas assim:
+## Cálculo do Score
 
 ```text
-combined_pressure = sqrt(commit_pressure * complexity_pressure)
+combined_pressure = sqrt(commit_pressure × complexity_pressure)
 
-score = 100 * (
-  0.75 * combined_pressure
-  + 0.15 * commit_pressure
-  + 0.10 * churn_pressure
-)
+score = 100 × (0.75 × combined_pressure + 0.15 × commit_pressure + 0.10 × churn_pressure)
 ```
 
-O termo principal usa a raiz do produto entre frequência de commits e complexidade.
-Isso privilegia arquivos que são simultaneamente muito alterados e complexos, que é
-a definição operacional de hot spot adotada pelo trabalho.
+O termo principal usa a média geométrica entre frequência e complexidade, privilegiando
+arquivos que são simultaneamente muito alterados e estruturalmente difíceis.
 
-## 8. Linguagens Suportadas
+## Linguagens Suportadas
 
-A análise usa o Lizard e suporta, entre outras:
+Python, Java, JavaScript, TypeScript, C, C++, C#, Go, Ruby, PHP, Swift, Kotlin, Rust, Scala.
 
-- Python
-- Java
-- JavaScript
-- TypeScript
-- C/C++
-- C#
-- Go
-- Ruby
-- PHP
-- Swift
-- Kotlin
-- Rust
-- Scala
-
-Use `--lang` para restringir:
+Use `--lang` para restringir a análise:
 
 ```bash
-uv run repo-miner analyze . --lang python --lang javascript
+uv run hotscope analyze . --lang python --lang javascript
 ```
 
-## 9. Testes e Qualidade
-
-Rodar testes:
-
-```bash
-uv run --extra dev pytest
-```
-
-Rodar lint:
-
-```bash
-uv run --extra dev ruff check .
-```
-
-Validação manual no próprio projeto:
-
-```bash
-uv run repo-miner analyze . --lang python --no-plot --top 8
-uv run repo-miner report . --lang python --format json --out reports/sample-hotspots.json
-```
-
-## 10. Estrutura
+## Estrutura do Projeto
 
 ```text
 src/repo_miner/
@@ -215,27 +179,15 @@ src/repo_miner/
   git_mining.py   # coleta do histórico Git com PyDriller
   complexity.py   # métricas de código com Lizard
   hotspots.py     # seleção de arquivos e cálculo do score
-  exporters.py    # CSV, JSON e Markdown
+  exporters.py    # saída em CSV, JSON e Markdown
   rendering.py    # tabela Rich e gráfico Plotext
   models.py       # dataclasses do domínio
 tests/
-  test_*.py       # testes unitários e integração com repo Git temporário
-docs/
-  RELATORIO.md    # relatório técnico do trabalho
+  test_models.py
+  test_complexity.py
+  test_hotspots.py
+  test_exporters.py
+  test_cli.py
+  test_git_mining.py
+  test_mining_integration.py
 ```
-
-## 11. Limitações
-
-- A ferramenta analisa o estado atual dos arquivos para complexidade, não a
-  complexidade histórica de cada versão.
-- Arquivos removidos no histórico não entram no ranking final, pois não existem no
-  estado atual do repositório.
-- O score é heurístico, mas explícito e reproduzível.
-- Issues, pull requests e CI/CD não são analisados nesta versão.
-
-## 12. Próximos Passos Possíveis
-
-- Coletar issues e pull requests via API do GitHub.
-- Comparar evolução da complexidade ao longo do tempo.
-- Gerar gráficos em PNG/HTML além do terminal.
-- Adicionar sugestões automáticas de refatoração por tipo de arquivo.
