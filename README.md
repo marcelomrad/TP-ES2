@@ -126,7 +126,7 @@ uv run pytest
 Rodar com cobertura:
 
 ```bash
-uv run pytest --cov=repo_miner
+uv run pytest --cov=src/repo_miner
 ```
 
 Rodar o linter:
