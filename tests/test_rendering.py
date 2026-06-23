@@ -3,7 +3,7 @@ from datetime import datetime
 from rich.console import Console
 
 from repo_miner.models import AnalysisResult, FileHotspot
-from repo_miner.rendering import render_hotspot_table, render_summary, risk_style
+from repo_miner.rendering import render_hotspot_table, render_plot, render_summary, risk_style
 
 
 def make_hotspot(path: str, score: float) -> FileHotspot:
@@ -62,3 +62,12 @@ def test_render_hotspot_table_respects_limit() -> None:
     output = console.export_text()
     assert "src/high.py" in output
     assert "src/lower.py" not in output
+
+
+def test_render_plot_noops_when_there_are_no_hotspots(capsys) -> None:
+    console = Console(record=True)
+
+    render_plot(console, (), limit=10)
+
+    captured = capsys.readouterr()
+    assert captured.out == ""
