@@ -115,6 +115,7 @@ def test_build_result_filters_by_risk_level(tmp_path, monkeypatch) -> None:
         min_commits=1,
         min_score=0.0,
         risks=["alto"],
+        sort_by="score",
         since=None,
         until=None,
     )

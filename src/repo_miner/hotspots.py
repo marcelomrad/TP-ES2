@@ -32,6 +32,7 @@ DEFAULT_EXCLUDE_PATTERNS = (
     "htmlcov/*",
 )
 VALID_RISK_LEVELS = {"baixo", "medio", "alto"}
+VALID_SORT_MODES = {"score", "commits", "complexity", "churn"}
 
 
 def parse_date(value: str | None) -> datetime | None:
@@ -132,6 +133,24 @@ def normalize_risk_levels(risks: Iterable[str] | None) -> set[str]:
     return normalized
 
 
+def normalize_sort_mode(sort_by: str) -> str:
+    normalized = sort_by.strip().lower()
+    if normalized not in VALID_SORT_MODES:
+        supported = ", ".join(sorted(VALID_SORT_MODES))
+        raise ValueError(f"Invalid sort mode '{sort_by}'. Use one of: {supported}.")
+    return normalized
+
+
+def hotspot_sort_key(hotspot: FileHotspot, sort_by: str) -> tuple[float | int, ...]:
+    if sort_by == "commits":
+        return (hotspot.commits, hotspot.score, hotspot.total_complexity, hotspot.line_churn)
+    if sort_by == "complexity":
+        return (hotspot.total_complexity, hotspot.score, hotspot.commits, hotspot.line_churn)
+    if sort_by == "churn":
+        return (hotspot.line_churn, hotspot.score, hotspot.commits, hotspot.total_complexity)
+    return (hotspot.score, hotspot.commits, hotspot.total_complexity, hotspot.line_churn)
+
+
 def build_hotspot(
     history: HistoryMetrics,
     complexity: ComplexityMetrics,
@@ -177,6 +196,7 @@ def analyze_repository(
     min_commits: int = 1,
     min_score: float = 0.0,
     risks: Iterable[str] | None = None,
+    sort_by: str = "score",
 ) -> AnalysisResult:
     if min_commits < 1:
         raise ValueError("min_commits must be greater than or equal to 1.")
@@ -197,6 +217,7 @@ def analyze_repository(
                 min_commits=min_commits,
                 min_score=min_score,
                 risks=risks,
+                sort_by=sort_by,
                 since=since,
                 until=until,
             )
@@ -214,6 +235,7 @@ def analyze_repository(
         min_commits=min_commits,
         min_score=min_score,
         risks=risks,
+        sort_by=sort_by,
         since=since,
         until=until,
     )
@@ -231,10 +253,12 @@ def _build_result(
     min_commits: int,
     min_score: float,
     risks: Iterable[str] | None,
+    sort_by: str,
     since: datetime | None,
     until: datetime | None,
 ) -> AnalysisResult:
     risk_levels = normalize_risk_levels(risks)
+    sort_mode = normalize_sort_mode(sort_by)
     candidate_paths = select_candidate_paths(
         repository,
         history,
@@ -268,12 +292,7 @@ def _build_result(
                 )
                 for path in candidate_paths
             ),
-            key=lambda hotspot: (
-                hotspot.score,
-                hotspot.commits,
-                hotspot.total_complexity,
-                hotspot.line_churn,
-            ),
+            key=lambda hotspot: hotspot_sort_key(hotspot, sort_mode),
             reverse=True,
         )
     )
