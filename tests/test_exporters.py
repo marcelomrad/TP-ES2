@@ -48,3 +48,14 @@ def test_write_csv_report(tmp_path: Path) -> None:
 
     assert "path,risk,score" in content
     assert "src/app.py,alto,82.5" in content
+
+
+def test_write_markdown_report(tmp_path: Path) -> None:
+    output = tmp_path / "report.md"
+    write_report(make_result(tmp_path), output, "md")
+
+    content = output.read_text(encoding="utf-8")
+
+    assert "# Relatorio de hot spots" in content
+    assert "src/app.py" in content
+    assert "alto" in content
