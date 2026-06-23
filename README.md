@@ -115,6 +115,24 @@ Filtrar por caminhos:
 uv run hotscope analyze . --include "src/*" --exclude "tests/*"
 ```
 
+Filtrar por nível de risco e mudar a ordenação:
+
+```bash
+uv run hotscope hotspots . --risk alto --sort-by churn --top 10
+```
+
+Opções de ordenação disponíveis:
+
+| Valor | Critério principal |
+|-------|--------------------|
+| `score` | Score normalizado de risco |
+| `commits` | Quantidade de commits por arquivo |
+| `complexity` | Complexidade ciclomática total |
+| `churn` | Linhas adicionadas + removidas |
+
+Os relatórios JSON e Markdown incluem um resumo com filtros aplicados,
+período, score mínimo, riscos selecionados e critério de ordenação.
+
 ## Testes
 
 Rodar os testes localmente:
@@ -136,6 +154,14 @@ uv run ruff check .
 ```
 
 Os testes também são executados automaticamente via **GitHub Actions** a cada push.
+
+## Versionamento
+
+O projeto segue versionamento semântico `MAJOR.MINOR.PATCH`:
+
+- `PATCH`: correções compatíveis, documentação e testes.
+- `MINOR`: novas opções compatíveis na CLI, como filtros e ordenação.
+- `MAJOR`: mudanças incompatíveis em comandos, nomes de campos ou formatos.
 
 ## Métricas Coletadas
 

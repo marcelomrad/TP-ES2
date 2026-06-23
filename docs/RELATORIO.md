@@ -97,15 +97,22 @@ Módulos principais:
 
 A CLI apresenta:
 
-- tabela ordenada por score;
+- tabela ordenada por score, commits, complexidade ou churn;
 - classificação de risco;
 - gráfico de dispersão commits x complexidade no terminal;
-- relatórios exportáveis em CSV, JSON ou Markdown.
+- filtros por linguagem, caminho, período, score mínimo e nível de risco;
+- relatórios exportáveis em CSV, JSON ou Markdown, com resumo dos filtros aplicados.
 
 Exemplo:
 
 ```bash
 uv run hotscope analyze . --lang python --top 8
+```
+
+Exemplo com filtro de risco e ordenação por churn:
+
+```bash
+uv run hotscope hotspots . --risk alto --sort-by churn --top 8
 ```
 
 ## Verificação
@@ -115,6 +122,8 @@ Foram criados testes automatizados para:
 - cálculo do score;
 - parsing de datas;
 - exportação JSON e CSV;
+- filtros por score, commits, linguagem e risco;
+- ordenação alternativa do ranking;
 - integração com um repositório Git temporário.
 
 Comandos de validação:
@@ -124,6 +133,12 @@ uv run --extra dev pytest
 uv run --extra dev ruff check .
 uv run hotscope analyze . --lang python --no-plot --top 8
 ```
+
+## Versionamento
+
+As mudanças seguem versionamento semântico `MAJOR.MINOR.PATCH`.
+Correções de documentação, validação e testes são `PATCH`. As novas opções
+compatíveis da CLI, como `--risk` e `--sort-by`, justificam evolução `MINOR`.
 
 ## Limitações
 
