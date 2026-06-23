@@ -44,6 +44,26 @@ def test_min_commits_filter_excludes_files_below_threshold(tmp_path: Path) -> No
     assert "rare.py" not in paths
 
 
+def test_language_filter_excludes_non_python_files(tmp_path: Path) -> None:
+    repository = tmp_path / "repo"
+    repository.mkdir()
+    run_git(repository, "init")
+
+    py_file = repository / "app.py"
+    py_file.write_text("def foo(): pass\n", encoding="utf-8")
+    commit_all(repository, "add python file")
+
+    js_file = repository / "main.js"
+    js_file.write_text("function foo() {}\n", encoding="utf-8")
+    commit_all(repository, "add javascript file")
+
+    result = analyze_repository(repository, languages=["python"])
+
+    paths = [h.path for h in result.hotspots]
+    assert "app.py" in paths
+    assert "main.js" not in paths
+
+
 def test_analyze_repository_finds_python_hotspot(tmp_path: Path) -> None:
     repository = tmp_path / "sample"
     repository.mkdir()
