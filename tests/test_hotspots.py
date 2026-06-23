@@ -3,6 +3,7 @@ from datetime import datetime
 import pytest
 
 from repo_miner.hotspots import (
+    _build_result,
     analyze_repository,
     build_hotspot,
     classify_risk,
@@ -72,6 +73,53 @@ def test_analyze_repository_rejects_until_before_since() -> None:
             since=datetime(2026, 6, 22),
             until=datetime(2026, 1, 1),
         )
+
+
+def test_build_result_filters_by_risk_level(tmp_path, monkeypatch) -> None:
+    histories = {
+        "high.py": _make_history(path="high.py", commits=10, churn=200),
+        "low.py": _make_history(path="low.py", commits=1, churn=5),
+    }
+    complexities = {
+        "high.py": ComplexityMetrics(
+            path="high.py",
+            total_complexity=20,
+            max_function_complexity=10,
+            functions=2,
+            nloc=80,
+        ),
+        "low.py": ComplexityMetrics(
+            path="low.py",
+            total_complexity=1,
+            max_function_complexity=1,
+            functions=1,
+            nloc=10,
+        ),
+    }
+    for path in histories:
+        (tmp_path / path).write_text("x = 1\n", encoding="utf-8")
+
+    monkeypatch.setattr(
+        "repo_miner.hotspots.analyze_complexity",
+        lambda _file_path, relative_path: complexities[relative_path],
+    )
+
+    result = _build_result(
+        repository=tmp_path,
+        display_repository=tmp_path,
+        history=histories,
+        commits_analyzed=11,
+        languages=["python"],
+        include=None,
+        exclude=None,
+        min_commits=1,
+        min_score=0.0,
+        risks=["alto"],
+        since=None,
+        until=None,
+    )
+
+    assert [hotspot.path for hotspot in result.hotspots] == ["high.py"]
 
 
 def test_matches_any_returns_true_on_matching_pattern() -> None:
