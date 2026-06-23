@@ -69,6 +69,10 @@ def analyze(
         int,
         typer.Option("--min-commits", min=1, help="Numero minimo de commits por arquivo."),
     ] = 1,
+    min_score: Annotated[
+        float,
+        typer.Option("--min-score", min=0.0, max=100.0, help="Score minimo para exibir (0-100)."),
+    ] = 0.0,
     top: Annotated[int, typer.Option("--top", min=1, help="Quantidade de arquivos exibidos.")] = 10,
     plot: Annotated[
         bool,
@@ -84,6 +88,7 @@ def analyze(
         include=include,
         exclude=exclude,
         min_commits=min_commits,
+        min_score=min_score,
     )
     render_summary(console, result)
     render_hotspot_table(console, result.hotspots, limit=top)
@@ -100,6 +105,7 @@ def hotspots(
     include: Annotated[list[str] | None, typer.Option("--include")] = None,
     exclude: Annotated[list[str] | None, typer.Option("--exclude")] = None,
     min_commits: Annotated[int, typer.Option("--min-commits", min=1)] = 1,
+    min_score: Annotated[float, typer.Option("--min-score", min=0.0, max=100.0)] = 0.0,
     top: Annotated[int, typer.Option("--top", min=1)] = 10,
 ) -> None:
     """Lista os arquivos mais criticos pelo score de hot spot."""
@@ -111,6 +117,7 @@ def hotspots(
         include=include,
         exclude=exclude,
         min_commits=min_commits,
+        min_score=min_score,
     )
     render_hotspot_table(console, result.hotspots, limit=top)
 
@@ -136,6 +143,7 @@ def report(
     include: Annotated[list[str] | None, typer.Option("--include")] = None,
     exclude: Annotated[list[str] | None, typer.Option("--exclude")] = None,
     min_commits: Annotated[int, typer.Option("--min-commits", min=1)] = 1,
+    min_score: Annotated[float, typer.Option("--min-score", min=0.0, max=100.0)] = 0.0,
 ) -> None:
     """Gera um relatorio exportavel em CSV, JSON ou Markdown."""
     result = run_analysis(
@@ -146,6 +154,7 @@ def report(
         include=include,
         exclude=exclude,
         min_commits=min_commits,
+        min_score=min_score,
     )
     try:
         report_path = write_report(result, out, output_format)
@@ -165,6 +174,7 @@ def run_analysis(
     include: list[str] | None,
     exclude: list[str] | None,
     min_commits: int,
+    min_score: float = 0.0,
 ):
     source = repository if is_remote_url(repository) else Path(repository)
     try:
@@ -176,6 +186,7 @@ def run_analysis(
             include=include,
             exclude=exclude,
             min_commits=min_commits,
+            min_score=min_score,
         )
     except (RepositoryMiningError, ValueError) as exc:
         console.print(f"[bold red]Erro:[/bold red] {exc}")

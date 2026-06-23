@@ -122,6 +122,14 @@ Filtrar caminhos:
 uv run repo-miner analyze /caminho/para/repositorio --include "src/*" --exclude "tests/*"
 ```
 
+Exibir apenas arquivos com score acima de um limite:
+
+```bash
+uv run repo-miner analyze /caminho/para/repositorio --min-score 50
+uv run repo-miner hotspots /caminho/para/repositorio --min-score 70
+uv run repo-miner report /caminho/para/repositorio --min-score 40 --format csv --out reports/hotspots.csv
+```
+
 ## 6. Métricas Coletadas
 
 | Métrica | Fonte | Interpretação |
