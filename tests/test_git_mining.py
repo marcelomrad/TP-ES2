@@ -5,7 +5,13 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from repo_miner.git_mining import RepositoryMiningError, clone_remote, is_remote_url
+from repo_miner.git_mining import (
+    RepositoryMiningError,
+    clone_remote,
+    ensure_git_repository,
+    is_remote_url,
+    normalize_repo_path,
+)
 
 
 @pytest.mark.parametrize(
@@ -30,6 +36,24 @@ def test_clone_remote_raises_on_invalid_url() -> None:
     with pytest.raises(RepositoryMiningError, match="Could not clone repository"):
         with clone_remote("https://github.com/invalid-user-xyz/nonexistent-repo-xyz.git"):
             pass
+
+
+def test_normalize_repo_path_converts_backslashes() -> None:
+    assert normalize_repo_path("src\\app\\main.py") == "src/app/main.py"
+
+
+def test_normalize_repo_path_returns_none_for_none() -> None:
+    assert normalize_repo_path(None) is None
+
+
+def test_ensure_git_repository_raises_on_nonexistent_path() -> None:
+    with pytest.raises(RepositoryMiningError, match="does not exist"):
+        ensure_git_repository(Path("/nonexistent/path/repo"))
+
+
+def test_ensure_git_repository_raises_on_non_git_directory(tmp_path: Path) -> None:
+    with pytest.raises(RepositoryMiningError, match="not a Git repository"):
+        ensure_git_repository(tmp_path)
 
 
 def test_clone_remote_yields_path(tmp_path: Path) -> None:
