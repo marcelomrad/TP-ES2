@@ -93,6 +93,13 @@ class AnalysisResult:
     files_analyzed: int
     since: datetime | None = None
     until: datetime | None = None
+    languages: tuple[str, ...] = ()
+    include: tuple[str, ...] = ()
+    exclude: tuple[str, ...] = ()
+    min_commits: int = 1
+    min_score: float = 0.0
+    risks: tuple[str, ...] = ()
+    sort_by: str = "score"
 
     @property
     def has_hotspots(self) -> bool:

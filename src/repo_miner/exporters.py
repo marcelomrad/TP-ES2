@@ -3,13 +3,14 @@ from __future__ import annotations
 import csv
 import json
 from pathlib import Path
+from typing import Any
 
 from repo_miner.models import AnalysisResult
 
 SUPPORTED_FORMATS = {"csv", "json", "md"}
 
 
-def result_summary(result: AnalysisResult) -> dict[str, str | int | None]:
+def result_summary(result: AnalysisResult) -> dict[str, Any]:
     return {
         "repository": str(result.repository),
         "commits_analyzed": result.commits_analyzed,
@@ -17,6 +18,15 @@ def result_summary(result: AnalysisResult) -> dict[str, str | int | None]:
         "files_analyzed": result.files_analyzed,
         "since": result.since.isoformat() if result.since else None,
         "until": result.until.isoformat() if result.until else None,
+        "filters": {
+            "languages": list(result.languages),
+            "include": list(result.include),
+            "exclude": list(result.exclude),
+            "min_commits": result.min_commits,
+            "min_score": result.min_score,
+            "risks": list(result.risks),
+            "sort_by": result.sort_by,
+        },
     }
 
 
@@ -80,6 +90,16 @@ def write_markdown(result: AnalysisResult, output: Path) -> None:
         f"- Arquivos vistos no historico: {result.files_seen}",
         f"- Arquivos analisados: {result.files_analyzed}",
         "",
+        "## Filtros aplicados",
+        "",
+        f"- Linguagens: {format_list(result.languages, default='todas suportadas')}",
+        f"- Include: {format_list(result.include)}",
+        f"- Exclude: {format_list(result.exclude)}",
+        f"- Minimo de commits: {result.min_commits}",
+        f"- Score minimo: {result.min_score:g}",
+        f"- Riscos: {format_list(result.risks, default='todos')}",
+        f"- Ordenacao: {result.sort_by}",
+        "",
         "| Rank | Risco | Score | Arquivo | Commits | Churn | CC total | CC max | NLOC |",
         "|---:|---|---:|---|---:|---:|---:|---:|---:|",
     ]
@@ -93,3 +113,7 @@ def write_markdown(result: AnalysisResult, output: Path) -> None:
         )
 
     output.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def format_list(values: tuple[str, ...], *, default: str = "nenhum") -> str:
+    return ", ".join(values) if values else default

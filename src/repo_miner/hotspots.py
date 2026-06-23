@@ -257,12 +257,13 @@ def _build_result(
     since: datetime | None,
     until: datetime | None,
 ) -> AnalysisResult:
+    normalized_languages = normalize_languages(languages)
     risk_levels = normalize_risk_levels(risks)
     sort_mode = normalize_sort_mode(sort_by)
     candidate_paths = select_candidate_paths(
         repository,
         history,
-        languages=languages,
+        languages=normalized_languages,
         include=include,
         exclude=exclude,
         min_commits=min_commits,
@@ -310,4 +311,11 @@ def _build_result(
         files_analyzed=len(candidate_paths),
         since=since,
         until=until,
+        languages=tuple(sorted(normalized_languages or ())),
+        include=tuple(pattern for pattern in (include or ()) if pattern),
+        exclude=tuple(pattern for pattern in (exclude or ()) if pattern),
+        min_commits=min_commits,
+        min_score=min_score,
+        risks=tuple(sorted(risk_levels)),
+        sort_by=sort_mode,
     )
