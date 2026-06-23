@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from repo_miner.exporters import write_report
 from repo_miner.models import AnalysisResult, FileHotspot
 
@@ -48,6 +50,25 @@ def test_write_csv_report(tmp_path: Path) -> None:
 
     assert "path,risk,score" in content
     assert "src/app.py,alto,82.5" in content
+
+
+def test_write_report_raises_on_unsupported_format(tmp_path: Path) -> None:
+    output = tmp_path / "report.xml"
+    with pytest.raises(ValueError, match="Unsupported report format"):
+        write_report(make_result(tmp_path), output, "xml")
+
+
+def test_result_summary_returns_expected_fields(tmp_path: Path) -> None:
+    from repo_miner.exporters import result_summary
+
+    result = make_result(tmp_path)
+    summary = result_summary(result)
+
+    assert summary["commits_analyzed"] == 4
+    assert summary["files_seen"] == 2
+    assert summary["files_analyzed"] == 1
+    assert summary["since"] is None
+    assert summary["until"] is None
 
 
 def test_write_markdown_report(tmp_path: Path) -> None:
