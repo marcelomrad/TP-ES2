@@ -119,3 +119,14 @@ def test_analyze_accepts_risk_filter_option() -> None:
     assert result.exit_code == 0
     _, kwargs = mock.call_args
     assert kwargs["risks"] == ["alto"]
+
+
+def test_hotspots_accepts_sort_by_option() -> None:
+    with patch("repo_miner.cli.analyze_repository", return_value=FAKE_RESULT) as mock:
+        result = runner.invoke(
+            app,
+            ["hotspots", "https://github.com/user/repo.git", "--sort-by", "churn"],
+        )
+    assert result.exit_code == 0
+    _, kwargs = mock.call_args
+    assert kwargs["sort_by"] == "churn"

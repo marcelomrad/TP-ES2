@@ -123,6 +123,54 @@ def test_build_result_filters_by_risk_level(tmp_path, monkeypatch) -> None:
     assert [hotspot.path for hotspot in result.hotspots] == ["high.py"]
 
 
+def test_build_result_sorts_by_line_churn(tmp_path, monkeypatch) -> None:
+    histories = {
+        "busy.py": _make_history(path="busy.py", commits=2, churn=500),
+        "complex.py": _make_history(path="complex.py", commits=10, churn=20),
+    }
+    complexities = {
+        "busy.py": ComplexityMetrics(
+            path="busy.py",
+            total_complexity=2,
+            max_function_complexity=2,
+            functions=1,
+            nloc=20,
+        ),
+        "complex.py": ComplexityMetrics(
+            path="complex.py",
+            total_complexity=20,
+            max_function_complexity=10,
+            functions=3,
+            nloc=100,
+        ),
+    }
+    for path in histories:
+        (tmp_path / path).write_text("x = 1\n", encoding="utf-8")
+
+    monkeypatch.setattr(
+        "repo_miner.hotspots.analyze_complexity",
+        lambda _file_path, relative_path: complexities[relative_path],
+    )
+
+    result = _build_result(
+        repository=tmp_path,
+        display_repository=tmp_path,
+        history=histories,
+        commits_analyzed=12,
+        languages=["python"],
+        include=None,
+        exclude=None,
+        min_commits=1,
+        min_score=0.0,
+        risks=None,
+        sort_by="churn",
+        since=None,
+        until=None,
+    )
+
+    assert [hotspot.path for hotspot in result.hotspots] == ["busy.py", "complex.py"]
+
+
 def test_matches_any_returns_true_on_matching_pattern() -> None:
     assert matches_any("node_modules/lodash/index.js", ["node_modules/*"]) is True
 
