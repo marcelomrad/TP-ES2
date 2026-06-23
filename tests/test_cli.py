@@ -71,3 +71,14 @@ def test_hotspots_respects_top_option() -> None:
             ["hotspots", "https://github.com/user/repo.git", "--top", "5"],
         )
     assert result.exit_code == 0
+
+
+def test_report_rejects_invalid_format(tmp_path: Path) -> None:
+    out_file = tmp_path / "report.xml"
+    with patch("repo_miner.cli.analyze_repository", return_value=FAKE_RESULT):
+        result = runner.invoke(
+            app,
+            ["report", "https://github.com/user/repo.git", "--format", "xml", "--out", str(out_file)],
+        )
+    assert result.exit_code != 0
+    assert "Erro" in result.output
