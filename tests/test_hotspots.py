@@ -3,6 +3,7 @@ from datetime import datetime
 import pytest
 
 from repo_miner.hotspots import (
+    analyze_repository,
     build_hotspot,
     classify_risk,
     compute_hotspot_score,
@@ -62,6 +63,15 @@ def test_parse_date_accepts_iso_date() -> None:
     assert parsed.year == 2026
     assert parsed.month == 6
     assert parsed.day == 22
+
+
+def test_analyze_repository_rejects_until_before_since() -> None:
+    with pytest.raises(ValueError, match="until"):
+        analyze_repository(
+            ".",
+            since=datetime(2026, 6, 22),
+            until=datetime(2026, 1, 1),
+        )
 
 
 def test_matches_any_returns_true_on_matching_pattern() -> None:
