@@ -1,6 +1,7 @@
 import pytest
 
-from repo_miner.hotspots import classify_risk, compute_hotspot_score, matches_any, normalize_metric, parse_date
+from repo_miner.hotspots import build_hotspot, classify_risk, compute_hotspot_score, matches_any, normalize_metric, parse_date
+from repo_miner.models import ComplexityMetrics, HistoryMetrics
 
 
 def test_parse_date_returns_none_for_none() -> None:
@@ -95,3 +96,40 @@ def test_classify_risk_boundary_medio_to_alto() -> None:
 def test_classify_risk_extremes() -> None:
     assert classify_risk(0.0) == "baixo"
     assert classify_risk(100.0) == "alto"
+
+
+def _make_history(path: str = "app.py", commits: int = 5, churn: int = 100) -> HistoryMetrics:
+    from datetime import datetime
+    metrics = HistoryMetrics(path=path)
+    metrics.register_change(
+        added_lines=churn,
+        deleted_lines=0,
+        author="dev",
+        changed_at=datetime(2026, 1, 1),
+    )
+    for _ in range(commits - 1):
+        metrics.register_change(added_lines=0, deleted_lines=0, author="dev", changed_at=datetime(2026, 2, 1))
+    return metrics
+
+
+def test_build_hotspot_sets_correct_risk_alto() -> None:
+    history = _make_history(commits=10, churn=200)
+    complexity = ComplexityMetrics(path="app.py", total_complexity=20, max_function_complexity=10, functions=2, nloc=50)
+
+    hotspot = build_hotspot(history, complexity, max_commits=10, max_complexity=20, max_line_churn=200)
+
+    assert hotspot.path == "app.py"
+    assert hotspot.risk == "alto"
+    assert hotspot.score == 100.0
+
+
+def test_build_hotspot_counts_authors() -> None:
+    from datetime import datetime
+    history = HistoryMetrics(path="app.py")
+    history.register_change(added_lines=10, deleted_lines=0, author="alice", changed_at=datetime(2026, 1, 1))
+    history.register_change(added_lines=10, deleted_lines=0, author="bob", changed_at=datetime(2026, 2, 1))
+    complexity = ComplexityMetrics(path="app.py")
+
+    hotspot = build_hotspot(history, complexity, max_commits=2, max_complexity=1, max_line_churn=20)
+
+    assert hotspot.authors == 2
