@@ -61,7 +61,7 @@ def test_hotspots_accepts_remote_url() -> None:
 def test_version_flag_prints_version() -> None:
     result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0
-    assert "repo-miner" in result.output
+    assert "hotscope" in result.output
 
 
 def test_hotspots_respects_top_option() -> None:

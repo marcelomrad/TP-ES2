@@ -28,7 +28,7 @@ RepositoryArgument = Annotated[
 
 def version_callback(value: bool) -> None:
     if value:
-        console.print(f"repo-miner {__version__}")
+        console.print(f"hotscope {__version__}")
         raise typer.Exit()
 
 
