@@ -165,6 +165,8 @@ def analyze_repository(
 ) -> AnalysisResult:
     if min_commits < 1:
         raise ValueError("min_commits must be greater than or equal to 1.")
+    if since and until and until < since:
+        raise ValueError("until must be greater than or equal to since.")
 
     if isinstance(repository, str) and is_remote_url(repository):
         history, commits_analyzed = mine_history(repository, since=since, until=until)
