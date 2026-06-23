@@ -31,6 +31,7 @@ DEFAULT_EXCLUDE_PATTERNS = (
     "*.lock",
     "htmlcov/*",
 )
+VALID_RISK_LEVELS = {"baixo", "medio", "alto"}
 
 
 def parse_date(value: str | None) -> datetime | None:
@@ -118,6 +119,19 @@ def classify_risk(score: float) -> str:
     return "baixo"
 
 
+def normalize_risk_levels(risks: Iterable[str] | None) -> set[str]:
+    if not risks:
+        return set()
+
+    normalized = {risk.strip().lower() for risk in risks if risk.strip()}
+    invalid = normalized - VALID_RISK_LEVELS
+    if invalid:
+        supported = ", ".join(sorted(VALID_RISK_LEVELS))
+        received = ", ".join(sorted(invalid))
+        raise ValueError(f"Invalid risk level '{received}'. Use one of: {supported}.")
+    return normalized
+
+
 def build_hotspot(
     history: HistoryMetrics,
     complexity: ComplexityMetrics,
@@ -162,6 +176,7 @@ def analyze_repository(
     exclude: Iterable[str] | None = None,
     min_commits: int = 1,
     min_score: float = 0.0,
+    risks: Iterable[str] | None = None,
 ) -> AnalysisResult:
     if min_commits < 1:
         raise ValueError("min_commits must be greater than or equal to 1.")
@@ -181,6 +196,7 @@ def analyze_repository(
                 exclude=exclude,
                 min_commits=min_commits,
                 min_score=min_score,
+                risks=risks,
                 since=since,
                 until=until,
             )
@@ -197,6 +213,7 @@ def analyze_repository(
         exclude=exclude,
         min_commits=min_commits,
         min_score=min_score,
+        risks=risks,
         since=since,
         until=until,
     )
@@ -213,9 +230,11 @@ def _build_result(
     exclude: Iterable[str] | None,
     min_commits: int,
     min_score: float,
+    risks: Iterable[str] | None,
     since: datetime | None,
     until: datetime | None,
 ) -> AnalysisResult:
+    risk_levels = normalize_risk_levels(risks)
     candidate_paths = select_candidate_paths(
         repository,
         history,
@@ -261,6 +280,8 @@ def _build_result(
 
     if min_score > 0.0:
         hotspots = tuple(h for h in hotspots if h.score >= min_score)
+    if risk_levels:
+        hotspots = tuple(h for h in hotspots if h.risk in risk_levels)
 
     return AnalysisResult(
         repository=display_repository,
