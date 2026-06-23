@@ -56,3 +56,18 @@ def test_hotspots_accepts_remote_url() -> None:
             ["hotspots", "https://github.com/user/repo.git"],
         )
     assert result.exit_code == 0
+
+
+def test_version_flag_prints_version() -> None:
+    result = runner.invoke(app, ["--version"])
+    assert result.exit_code == 0
+    assert "repo-miner" in result.output
+
+
+def test_hotspots_respects_top_option() -> None:
+    with patch("repo_miner.cli.analyze_repository", return_value=FAKE_RESULT):
+        result = runner.invoke(
+            app,
+            ["hotspots", "https://github.com/user/repo.git", "--top", "5"],
+        )
+    assert result.exit_code == 0
