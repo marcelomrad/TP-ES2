@@ -134,6 +134,38 @@ wheels = [
 ]
 
 [[package]]
+name = "hotscope"
+version = "0.2.0"
+source = { editable = "." }
+dependencies = [
+    { name = "lizard" },
+    { name = "plotext" },
+    { name = "pydriller" },
+    { name = "rich" },
+    { name = "typer" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "lizard", specifier = ">=1.17.10" },
+    { name = "plotext", specifier = ">=5.3.2" },
+    { name = "pydriller", specifier = ">=2.7" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0" },
+    { name = "rich", specifier = ">=13.7.1" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6" },
+    { name = "typer", specifier = ">=0.12.5" },
+]
+provides-extras = ["dev"]
+
+[[package]]
 name = "iniconfig"
 version = "2.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -273,38 +305,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/ff/46/dd499ec9038423421
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ec/dd/96da98f892250475bdf2328112d7468abdd4acc7b902b6af23f4ed958ea0/pytz-2026.2-py2.py3-none-any.whl", hash = "sha256:04156e608bee23d3792fd45c94ae47fae1036688e75032eea2e3bf0323d1f126", size = 510141, upload-time = "2026-05-04T01:35:27.408Z" },
 ]
-
-[[package]]
-name = "repo-miner"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "lizard" },
-    { name = "plotext" },
-    { name = "pydriller" },
-    { name = "rich" },
-    { name = "typer" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "pytest" },
-    { name = "pytest-cov" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "lizard", specifier = ">=1.17.10" },
-    { name = "plotext", specifier = ">=5.3.2" },
-    { name = "pydriller", specifier = ">=2.7" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0" },
-    { name = "rich", specifier = ">=13.7.1" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6" },
-    { name = "typer", specifier = ">=0.12.5" },
-]
-provides-extras = ["dev"]
 
 [[package]]
 name = "rich"

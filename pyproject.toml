@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hotscope"
-version = "0.1.0"
+version = "0.2.0"
 description = "CLI para mineracao de repositorios Git e identificacao de hot spots de manutencao."
 readme = "README.md"
 requires-python = ">=3.11"
