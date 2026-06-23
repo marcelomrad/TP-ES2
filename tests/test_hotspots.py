@@ -52,3 +52,31 @@ def test_parse_date_accepts_iso_date() -> None:
     assert parsed.year == 2026
     assert parsed.month == 6
     assert parsed.day == 22
+
+
+def test_matches_any_returns_true_on_matching_pattern() -> None:
+    assert matches_any("node_modules/lodash/index.js", ["node_modules/*"]) is True
+
+
+def test_matches_any_returns_false_on_no_match() -> None:
+    assert matches_any("src/app.py", ["node_modules/*", "dist/*"]) is False
+
+
+def test_matches_any_returns_false_for_none_patterns() -> None:
+    assert matches_any("src/app.py", None) is False
+
+
+def test_matches_any_returns_false_for_empty_patterns() -> None:
+    assert matches_any("src/app.py", []) is False
+
+
+def test_normalize_metric_returns_zero_when_max_is_zero() -> None:
+    assert normalize_metric(10, 0) == 0.0
+
+
+def test_normalize_metric_returns_one_at_maximum() -> None:
+    assert normalize_metric(5, 5) == 1.0
+
+
+def test_normalize_metric_returns_half_at_half_maximum() -> None:
+    assert normalize_metric(5, 10) == 0.5
