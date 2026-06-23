@@ -82,3 +82,26 @@ def test_report_rejects_invalid_format(tmp_path: Path) -> None:
         )
     assert result.exit_code != 0
     assert "Erro" in result.output
+
+
+def test_analyze_accepts_min_score_option() -> None:
+    with patch("repo_miner.cli.analyze_repository", return_value=FAKE_RESULT) as mock:
+        result = runner.invoke(
+            app,
+            ["analyze", "https://github.com/user/repo.git", "--no-plot", "--min-score", "50"],
+        )
+    assert result.exit_code == 0
+    mock.assert_called_once()
+    _, kwargs = mock.call_args
+    assert kwargs["min_score"] == 50.0
+
+
+def test_hotspots_accepts_min_score_option() -> None:
+    with patch("repo_miner.cli.analyze_repository", return_value=FAKE_RESULT) as mock:
+        result = runner.invoke(
+            app,
+            ["hotspots", "https://github.com/user/repo.git", "--min-score", "30"],
+        )
+    assert result.exit_code == 0
+    _, kwargs = mock.call_args
+    assert kwargs["min_score"] == 30.0
