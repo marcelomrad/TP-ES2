@@ -42,7 +42,9 @@ def test_history_metrics_register_change_accumulates() -> None:
 
 def test_history_metrics_line_churn() -> None:
     metrics = HistoryMetrics(path="src/app.py")
-    metrics.register_change(added_lines=15, deleted_lines=7, author="alice", changed_at=datetime.now())
+    metrics.register_change(
+        added_lines=15, deleted_lines=7, author="alice", changed_at=datetime.now()
+    )
     assert metrics.line_churn == 22
 
 
@@ -54,7 +56,9 @@ def test_history_metrics_ignores_none_author() -> None:
 
 def test_history_metrics_clamps_negative_lines() -> None:
     metrics = HistoryMetrics(path="src/app.py")
-    metrics.register_change(added_lines=-5, deleted_lines=-3, author="dev", changed_at=datetime.now())
+    metrics.register_change(
+        added_lines=-5, deleted_lines=-3, author="dev", changed_at=datetime.now()
+    )
     assert metrics.added_lines == 0
     assert metrics.deleted_lines == 0
 
