@@ -105,7 +105,7 @@ A CLI apresenta:
 Exemplo:
 
 ```bash
-uv run repo-miner analyze . --lang python --top 8
+uv run hotscope analyze . --lang python --top 8
 ```
 
 ## Verificação
@@ -122,7 +122,7 @@ Comandos de validação:
 ```bash
 uv run --extra dev pytest
 uv run --extra dev ruff check .
-uv run repo-miner analyze . --lang python --no-plot --top 8
+uv run hotscope analyze . --lang python --no-plot --top 8
 ```
 
 ## Limitações
