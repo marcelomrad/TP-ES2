@@ -1,4 +1,20 @@
-from repo_miner.hotspots import classify_risk, compute_hotspot_score, parse_date
+import pytest
+
+from repo_miner.hotspots import classify_risk, compute_hotspot_score, matches_any, normalize_metric, parse_date
+
+
+def test_parse_date_returns_none_for_none() -> None:
+    assert parse_date(None) is None
+
+
+def test_parse_date_returns_none_for_empty_string() -> None:
+    assert parse_date("") is None
+    assert parse_date("   ") is None
+
+
+def test_parse_date_raises_on_invalid_format() -> None:
+    with pytest.raises(ValueError, match="Invalid date"):
+        parse_date("31/12/2026")
 
 
 def test_hotspot_score_prioritizes_files_with_churn_and_complexity() -> None:
