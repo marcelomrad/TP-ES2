@@ -29,6 +29,13 @@ def make_result(tmp_path: Path) -> AnalysisResult:
         commits_analyzed=4,
         files_seen=2,
         files_analyzed=1,
+        languages=("python",),
+        include=("src/*",),
+        exclude=("tests/*",),
+        min_commits=2,
+        min_score=40.0,
+        risks=("alto",),
+        sort_by="churn",
     )
 
 
@@ -69,6 +76,15 @@ def test_result_summary_returns_expected_fields(tmp_path: Path) -> None:
     assert summary["files_analyzed"] == 1
     assert summary["since"] is None
     assert summary["until"] is None
+    assert summary["filters"] == {
+        "languages": ["python"],
+        "include": ["src/*"],
+        "exclude": ["tests/*"],
+        "min_commits": 2,
+        "min_score": 40.0,
+        "risks": ["alto"],
+        "sort_by": "churn",
+    }
 
 
 def test_write_markdown_report(tmp_path: Path) -> None:
@@ -78,5 +94,8 @@ def test_write_markdown_report(tmp_path: Path) -> None:
     content = output.read_text(encoding="utf-8")
 
     assert "# Relatorio de hot spots" in content
+    assert "## Filtros aplicados" in content
+    assert "Linguagens: python" in content
+    assert "Ordenacao: churn" in content
     assert "src/app.py" in content
     assert "alto" in content
