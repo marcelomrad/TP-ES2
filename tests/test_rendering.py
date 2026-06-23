@@ -3,7 +3,7 @@ from datetime import datetime
 from rich.console import Console
 
 from repo_miner.models import AnalysisResult
-from repo_miner.rendering import render_summary
+from repo_miner.rendering import render_summary, risk_style
 
 
 def test_render_summary_includes_repository_counts_and_period() -> None:
@@ -24,3 +24,9 @@ def test_render_summary_includes_repository_counts_and_period() -> None:
     assert "Repositorio: /tmp/project" in output
     assert "8 commits, 5 arquivos vistos, 3 arquivos de codigo analisados." in output
     assert "Periodo: 2026-01-01 -> 2026-06-22" in output
+
+
+def test_risk_style_maps_known_risk_levels() -> None:
+    assert risk_style("alto") == "bold red"
+    assert risk_style("medio") == "yellow"
+    assert risk_style("baixo") == "green"
