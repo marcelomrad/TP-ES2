@@ -80,3 +80,18 @@ def test_normalize_metric_returns_one_at_maximum() -> None:
 
 def test_normalize_metric_returns_half_at_half_maximum() -> None:
     assert normalize_metric(5, 10) == 0.5
+
+
+def test_classify_risk_boundary_baixo_to_medio() -> None:
+    assert classify_risk(39.9) == "baixo"
+    assert classify_risk(40.0) == "medio"
+
+
+def test_classify_risk_boundary_medio_to_alto() -> None:
+    assert classify_risk(69.9) == "medio"
+    assert classify_risk(70.0) == "alto"
+
+
+def test_classify_risk_extremes() -> None:
+    assert classify_risk(0.0) == "baixo"
+    assert classify_risk(100.0) == "alto"
