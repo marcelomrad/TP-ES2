@@ -22,6 +22,28 @@ def commit_all(repository: Path, message: str) -> None:
     )
 
 
+def test_min_commits_filter_excludes_files_below_threshold(tmp_path: Path) -> None:
+    repository = tmp_path / "repo"
+    repository.mkdir()
+    run_git(repository, "init")
+
+    frequent = repository / "frequent.py"
+    frequent.write_text("x = 1\n", encoding="utf-8")
+    commit_all(repository, "add frequent")
+    frequent.write_text("x = 2\n", encoding="utf-8")
+    commit_all(repository, "update frequent")
+
+    rare = repository / "rare.py"
+    rare.write_text("y = 1\n", encoding="utf-8")
+    commit_all(repository, "add rare")
+
+    result = analyze_repository(repository, languages=["python"], min_commits=2)
+
+    paths = [h.path for h in result.hotspots]
+    assert "frequent.py" in paths
+    assert "rare.py" not in paths
+
+
 def test_analyze_repository_finds_python_hotspot(tmp_path: Path) -> None:
     repository = tmp_path / "sample"
     repository.mkdir()
